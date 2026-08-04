@@ -10,13 +10,13 @@
     <meta name="author" content="">   
     
     <!-- css -->
-    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/sub.css}">
+    <link rel="stylesheet" href="../static/assets/css/reset.css" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" href="../static/assets/css/common.css" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" href="../static/assets/css/sub.css" th:href="@{/assets/css/sub.css}">
 
     <!-- script -->
-    <script th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
-    <script th:src="@{/assets/scripts/script.js}"></script>
+    <script src="../static/assets/scripts/jquery-3.1.1.min.js" th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
+    <script src="../static/assets/scripts/script.js" th:src="@{/assets/scripts/script.js}"></script>
     <style>
         header .calendar_home_link {
             display: inline-flex;
@@ -181,16 +181,16 @@
             <div class="menu">
                 <button class="drawer_trigger" id="openDrawer" type="button"
                         aria-label="개인 메뉴 열기" aria-controls="sideDrawer" aria-expanded="false">
-                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                    <img src="../static/assets/images/i_menu.png" th:src="@{/assets/images/i_menu.png}" alt="">
                 </button>
             </div>
             <div class="logo">
-                <a th:href="@{/home}">
-                    <img th:src="@{/assets/images/logo.png}" alt="">
+                <a href="home.html" th:href="@{/home}">
+                    <img src="../static/assets/images/logo.png" th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
                 </a>
             </div>
             <div class="menu">
-                <a class="calendar_home_link" th:href="@{/calendar}" aria-label="캘린더로 이동">
+                <a class="calendar_home_link" href="calender.html" th:href="@{/calendar}" aria-label="캘린더로 이동">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                          aria-hidden="true">
@@ -207,7 +207,7 @@
             aria-label="개인 메뉴 닫기" tabindex="-1"></button>
     <aside class="side_drawer" id="sideDrawer" aria-label="개인 메뉴" aria-hidden="true">
         <div class="drawer_header">
-            <img th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
+            <img src="../static/assets/images/logo.png" th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
             <button class="drawer_close" id="closeDrawer" type="button" aria-label="개인 메뉴 닫기">×</button>
         </div>
         <div class="drawer_profile">
@@ -215,11 +215,11 @@
             <p class="drawer_username" th:text="${currentUser.username}">dailytempo</p>
         </div>
         <nav class="drawer_nav" aria-label="바로가기">
-            <a th:href="@{/home}">홈</a>
-            <a th:href="@{/custom}">새 템포 만들기</a>
-            <a th:href="@{/calendar}">운동 캘린더</a>
+            <a href="home.html" th:href="@{/home}">홈</a>
+            <a href="custom.html" th:href="@{/custom}">새 템포 만들기</a>
+            <a href="calender.html" th:href="@{/calendar}">운동 캘린더</a>
         </nav>
-        <form class="drawer_logout_form" th:action="@{/logout}" method="post">
+        <form class="drawer_logout_form" action="login.html" th:action="@{/logout}" method="post">
             <button class="drawer_logout" type="submit">로그아웃</button>
         </form>
     </aside>
@@ -229,34 +229,38 @@
             <div class="main">
                 <div class="obj">
                     <div class="bar">
-                        <img th:src="@{/assets/images/main2.png}" alt="">
+                        <img src="../static/assets/images/main2.png" th:src="@{/assets/images/main2.png}" alt="">
                     </div>
                     <div class="tto">
-                        <img th:src="@{/assets/images/ttu.png}" alt="">
+                        <img src="../static/assets/images/ttu.png" th:src="@{/assets/images/ttu.png}" alt="">
                     </div>
                     <div class="tto_bottom">
-                        <img th:src="@{/assets/images/ttu_bottom.png}" alt="">
+                        <img src="../static/assets/images/ttu_bottom.png" th:src="@{/assets/images/ttu_bottom.png}" alt="">
                     </div>
                     <ul class="select_list">
                         <li>
                             <div class="select">
-                                <a th:href="@{/custom}">
-                                    <img th:src="@{/assets/images/main1.png}" alt="">
+                                <a href="custom.html" th:href="@{/custom}">
+                                    <img src="../static/assets/images/main1.png" th:src="@{/assets/images/main1.png}" alt="">
                                     <p>+</p>
                                 </a>
                             </div>
                         </li>
-                        <li th:each="tempo : ${tempoBoxes}">
+                        <li th:each="tempo : ${tempoBoxes}"
+                            th:if="${tempo.type.name() == 'UPDOWN'}">
                             <div class="select">
-                                <a th:if="${tempo.type.name() == 'UPDOWN'}"
-                                   th:href="@{/exercise(id=${tempo.id})}">
-                                    <img th:src="@{/assets/images/main1.png}" alt="">
-                                    <p th:text="${tempo.name}">Tempo</p>
+                                <a href="exercise.html" th:href="@{/exercise(id=${tempo.id})}">
+                                    <img src="../static/assets/images/main1.png" th:src="@{/assets/images/main1.png}" alt="">
+                                    <p th:text="${tempo.name}">Weight</p>
                                 </a>
-                                <a th:if="${tempo.type.name() == 'DOT'}"
-                                   th:href="@{/exercise_dot(id=${tempo.id})}">
-                                    <img th:src="@{/assets/images/main1.png}" alt="">
-                                    <p th:text="${tempo.name}">Tempo</p>
+                            </div>
+                        </li>
+                        <li th:each="tempo : ${tempoBoxes}"
+                            th:if="${tempo.type.name() == 'DOT'}">
+                            <div class="select">
+                                <a href="exercise_dot.html" th:href="@{/exercise_dot(id=${tempo.id})}">
+                                    <img src="../static/assets/images/main1.png" th:src="@{/assets/images/main1.png}" alt="">
+                                    <p th:text="${tempo.name}">Running</p>
                                 </a>
                             </div>
                         </li>
@@ -270,7 +274,7 @@
                             단백질 음료와 탄수화물 음료로 6주간 실험을 하였고 결과적으로 운동 후
                         </p>
                         <button type="button">
-                            <img th:src="@{/assets/images/i_arrow.png}" alt="">
+                            <img src="../static/assets/images/i_arrow.png" th:src="@{/assets/images/i_arrow.png}" alt="">
                         </button>
                     </div>
                 </div>

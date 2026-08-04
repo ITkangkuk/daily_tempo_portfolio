@@ -9,13 +9,13 @@
     <meta name="author" content="">   
     
     <!-- css -->
-    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/sub.css}">
+    <link rel="stylesheet" href="../static/assets/css/reset.css" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" href="../static/assets/css/common.css" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" href="../static/assets/css/sub.css" th:href="@{/assets/css/sub.css}">
 
     <!-- script -->
-    <script th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
-    <script th:src="@{/assets/scripts/script.js}"></script>
+    <script src="../static/assets/scripts/jquery-3.1.1.min.js" th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
+    <script src="../static/assets/scripts/script.js" th:src="@{/assets/scripts/script.js}"></script>
     
 </head>
 <body>
@@ -23,30 +23,32 @@
         <div class="wrap">
             <div class="menu" style="visibility: hidden;">
                 <a href="#none">
-                    <img th:src="@{/assets/images/i_close.png}" alt="">
+                    <img src="../static/assets/images/i_close.png" th:src="@{/assets/images/i_close.png}" alt="">
                 </a>
             </div>
-            <div class="menu">
+            <!--<div class="menu">
                 <a href="#">
-                    <img th:src="@{/assets/images/i_close.png}" alt="">
+                    <img src="../static/assets/images/i_close.png" th:src="@{/assets/images/i_close.png}" alt="">
                 </a>
-            </div>
+            </div>-->
         </div>
     </header>
     <div class="content ">
         <div class="wrap">
-            <form class="login" th:action="@{/login}" method="post">
+            <form class="login" action="home.html" th:action="@{/login}" method="post">
                 <div class="logo">
-                    <img th:src="@{/assets/images/logo.png}" alt="">
+                    <img src="../static/assets/images/logo.png" th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
                 </div>
-                <p th:if="${param.error}" role="alert">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+                <!--<p th:if="${param.error}" role="alert">아이디 또는 비밀번호가 올바르지 않습니다.</p>
                 <p th:if="${param.registered}">회원가입이 완료되었습니다. 로그인해 주세요.</p>
-                <p th:if="${param.logout}">로그아웃되었습니다.</p>
+                <p th:if="${param.logout}">로그아웃되었습니다.</p>-->
                 <div class="input_wrap first">
-                    <input type="text" name="username" placeholder="ID" autocomplete="username" required>
+                    <input type="text" name="username" value="dailytempo"
+                           placeholder="ID" autocomplete="username" required>
                 </div>
                 <div class="input_wrap">
-                    <input type="password" name="password" placeholder="PW" autocomplete="current-password" required>
+                    <input type="password" name="password" value="dailytempo1234"
+                           placeholder="PW" autocomplete="current-password" required>
                 </div>
                 <ul class="sns_list">
                     <li>
@@ -54,6 +56,7 @@
                             로그인
                         </button>
                     </li>
+                    <!-- 소셜 로그인 연동 전까지 숨김
                     <li>
                         <a href="#none" aria-disabled="true" title="네이버 OAuth 설정 후 활성화됩니다">
                             네이버로 로그인
@@ -64,16 +67,17 @@
                             카카오로 로그인
                         </a>
                     </li>
+                    -->
                 </ul>
                 <ul class="find_list">
                     <li>
-                        <a th:href="@{/id}">아이디 찾기</a>
+                        <a href="id.html" th:href="@{/id}">아이디 찾기</a>
                     </li>
                     <li>
-                        <a th:href="@{/pw}">비밀번호 찾기</a>
+                        <a href="pw.html" th:href="@{/pw}">비밀번호 찾기</a>
                     </li>
                     <li>
-                        <a th:href="@{/membership}">회원가입</a>
+                        <a href="membership.html" th:href="@{/membership}">회원가입</a>
                     </li>
                 </ul>
             </form>
@@ -82,8 +86,12 @@
     <footer>
 
     </footer>
-
-
-    
+    <script>
+        document.querySelector('.login').addEventListener('submit', function (event) {
+            if (!window.location.pathname.endsWith('.html')) return;
+            event.preventDefault();
+            window.location.href = 'home.html';
+        });
+    </script>
 </body>
 </html>

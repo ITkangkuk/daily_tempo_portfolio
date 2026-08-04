@@ -6,8 +6,8 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title th:text="${pageTitle} + ' | Daily Tempo'">캘린더 | Daily Tempo</title>
-    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" href="../static/assets/css/reset.css" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" href="../static/assets/css/common.css" th:href="@{/assets/css/common.css}">
     <style>
         body {
             height: 100dvh;
@@ -329,13 +329,13 @@
 <header>
     <div class="wrap">
         <div class="menu">
-            <a th:href="@{/home}" aria-label="홈으로 이동">
-                <img th:src="@{/assets/images/i_menu.png}" alt="">
+            <a href="home.html" th:href="@{/home}" aria-label="홈으로 이동">
+                <img src="../static/assets/images/i_menu.png" th:src="@{/assets/images/i_menu.png}" alt="">
             </a>
         </div>
         <div class="logo">
-            <a th:href="@{/home}">
-                <img th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
+            <a href="home.html" th:href="@{/home}">
+                <img src="../static/assets/images/logo.png" th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
             </a>
         </div>
         <div class="menu">
@@ -353,9 +353,9 @@
 
 <main class="mobile_calendar">
     <div class="calendar_toolbar">
-        <a class="icon_button" th:href="@{/calendar(month=${previousMonth})}" aria-label="이전 달">‹</a>
+        <a class="icon_button" href="calender.html" th:href="@{/calendar(month=${previousMonth})}" aria-label="이전 달">‹</a>
         <h1 th:text="${selectedMonth.year + '.' + selectedMonth.monthValue}">2026.7</h1>
-        <a class="icon_button" th:href="@{/calendar(month=${nextMonth})}" aria-label="다음 달">›</a>
+        <a class="icon_button" href="calender.html" th:href="@{/calendar(month=${nextMonth})}" aria-label="다음 달">›</a>
     </div>
 
     <div class="weekdays">
@@ -423,8 +423,11 @@
 <script>
     (function () {
         const modal = document.getElementById('settingsModal');
-        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+        const csrfMeta = document.querySelector('meta[name="_csrf"]');
+        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+        const csrfToken = csrfMeta && csrfMeta.content;
+        const csrfHeader = csrfHeaderMeta && csrfHeaderMeta.content;
+        const staticMode = window.location.pathname.endsWith('.html');
 
         function openSettings() {
             modal.hidden = false;
@@ -438,35 +441,219 @@
             if (event.target === modal) modal.hidden = true;
         });
 
-        document.querySelectorAll('.exercise_icon').forEach(function (button) {
-            button.addEventListener('click', async function () {
-                const completed = !button.classList.contains('completed');
-                button.classList.toggle('completed', completed);
-                button.setAttribute('aria-pressed', String(completed));
-
-                const body = new URLSearchParams({
-                    itemId: button.dataset.itemId,
-                    date: button.dataset.date,
-                    completed: String(completed)
-                });
-
-                try {
-                    const response = await fetch('/calendar/completion', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-                            [csrfHeader]: csrfToken
-                        },
-                        body: body
-                    });
-                    if (!response.ok) throw new Error('저장 실패');
-                } catch (error) {
-                    button.classList.toggle('completed', !completed);
-                    button.setAttribute('aria-pressed', String(!completed));
-                    window.alert('운동 체크를 저장하지 못했습니다. 다시 시도해 주세요.');
-                }
+        function bindCompletionButtons() {
+            document.querySelectorAll('.exercise_icon').forEach(function (button) {
+                if (button.dataset.bound === 'true') return;
+                button.dataset.bound = 'true';
+                button.addEventListener('click', updateCompletion);
             });
+        }
+
+        async function updateCompletion() {
+            const button = this;
+            const completed = !button.classList.contains('completed');
+            button.classList.toggle('completed', completed);
+            button.setAttribute('aria-pressed', String(completed));
+
+            const body = new URLSearchParams({
+                itemId: button.dataset.itemId,
+                date: button.dataset.date,
+                completed: String(completed)
+            });
+
+            try {
+                const response = await fetch('/calendar/completion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: body
+                });
+                if (!response.ok) throw new Error('저장 실패');
+            } catch (error) {
+                button.classList.toggle('completed', !completed);
+                button.setAttribute('aria-pressed', String(!completed));
+                window.alert('운동 체크를 저장하지 못했습니다. 다시 시도해 주세요.');
+            }
+        }
+
+        if (!staticMode) {
+            bindCompletionButtons();
+            return;
+        }
+
+        const ICON_OPTIONS = [
+            {key: 'run', label: '달리기'},
+            {key: 'upper', label: '상체 운동'},
+            {key: 'lower', label: '하체 운동'},
+            {key: 'dumbbell', label: '웨이트'},
+            {key: 'yoga', label: '요가'},
+            {key: 'cycle', label: '자전거'},
+            {key: 'swim', label: '수영'},
+            {key: 'stretch', label: '스트레칭'}
+        ];
+        const STORAGE_KEY = 'dailyTempoCalendar';
+        let selectedMonth = new Date();
+        let staticData = loadStaticData();
+
+        function loadStaticData() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                return {
+                    icons: Array.isArray(saved && saved.icons) ? saved.icons : [],
+                    completed: saved && typeof saved.completed === 'object' && saved.completed
+                        ? saved.completed : {}
+                };
+            } catch (error) {
+                return {icons: [], completed: {}};
+            }
+        }
+
+        function saveStaticData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(staticData));
+        }
+
+        function dateKey(date) {
+            return date.getFullYear() + '-' +
+                String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                String(date.getDate()).padStart(2, '0');
+        }
+
+        function iconSvg(key) {
+            return '<svg aria-hidden="true"><use href="#exercise-' + key + '"></use></svg>';
+        }
+
+        function renderCalendar() {
+            const grid = document.querySelector('.calendar_grid');
+            const title = document.querySelector('.calendar_toolbar h1');
+            const year = selectedMonth.getFullYear();
+            const month = selectedMonth.getMonth();
+            const today = new Date();
+            const start = new Date(year, month, 1 - new Date(year, month, 1).getDay());
+            title.textContent = year + '.' + (month + 1);
+            grid.innerHTML = '';
+
+            for (let index = 0; index < 42; index++) {
+                const date = new Date(start);
+                date.setDate(start.getDate() + index);
+                const currentMonth = date.getMonth() === month;
+                const key = dateKey(date);
+                const day = document.createElement('section');
+                day.className = 'calendar_day' + (!currentMonth ? ' other_month' : '') +
+                    (date.toDateString() === today.toDateString() ? ' today' : '');
+                day.innerHTML = '<time class="calendar_date" datetime="' + key + '">' +
+                    date.getDate() + '</time>';
+
+                if (currentMonth) {
+                    const icons = document.createElement('div');
+                    icons.className = 'day_icons';
+                    staticData.icons.forEach(function (iconKey) {
+                        const option = ICON_OPTIONS.find(function (item) { return item.key === iconKey; });
+                        if (!option) return;
+                        const completed = (staticData.completed[key] || []).includes(iconKey);
+                        const button = document.createElement('button');
+                        button.className = 'exercise_icon' + (completed ? ' completed' : '');
+                        button.type = 'button';
+                        button.dataset.itemId = iconKey;
+                        button.dataset.date = key;
+                        button.dataset.icon = iconKey;
+                        button.setAttribute('aria-label', option.label + ' 완료 체크');
+                        button.setAttribute('aria-pressed', String(completed));
+                        button.innerHTML = iconSvg(iconKey);
+                        button.addEventListener('click', updateStaticCompletion);
+                        icons.appendChild(button);
+                    });
+                    day.appendChild(icons);
+                }
+                grid.appendChild(day);
+            }
+        }
+
+        function updateStaticCompletion() {
+            const date = this.dataset.date;
+            const iconKey = this.dataset.icon;
+            const completedIcons = staticData.completed[date] || [];
+            const index = completedIcons.indexOf(iconKey);
+            if (index >= 0) {
+                completedIcons.splice(index, 1);
+            } else {
+                completedIcons.push(iconKey);
+            }
+            if (completedIcons.length) staticData.completed[date] = completedIcons;
+            else delete staticData.completed[date];
+            saveStaticData();
+            this.classList.toggle('completed', index < 0);
+            this.setAttribute('aria-pressed', String(index < 0));
+        }
+
+        function renderSettings() {
+            const catalog = document.querySelector('.icon_catalog');
+            catalog.innerHTML = '';
+            ICON_OPTIONS.forEach(function (option) {
+                const button = document.createElement('button');
+                button.className = 'catalog_button';
+                button.type = 'button';
+                button.dataset.icon = option.key;
+                button.disabled = staticData.icons.includes(option.key);
+                button.innerHTML = iconSvg(option.key) + '<span>' + option.label + '</span>';
+                button.addEventListener('click', function () {
+                    if (!staticData.icons.includes(option.key)) staticData.icons.push(option.key);
+                    saveStaticData();
+                    renderCalendar();
+                    renderSettings();
+                });
+                catalog.appendChild(button);
+            });
+
+            modal.querySelectorAll('.active_icon, .active_icons_title + .settings_hint').forEach(function (element) {
+                element.remove();
+            });
+            const title = modal.querySelector('.active_icons_title');
+            if (!staticData.icons.length) {
+                const empty = document.createElement('p');
+                empty.className = 'settings_hint';
+                empty.textContent = '추가한 운동 아이콘이 없습니다.';
+                title.insertAdjacentElement('afterend', empty);
+                return;
+            }
+            staticData.icons.slice().reverse().forEach(function (iconKey) {
+                const option = ICON_OPTIONS.find(function (item) { return item.key === iconKey; });
+                if (!option) return;
+                const row = document.createElement('div');
+                row.className = 'active_icon';
+                row.innerHTML = '<div class="active_icon_name" data-icon="' + iconKey + '">' +
+                    iconSvg(iconKey) + '<span>' + option.label + '</span></div>' +
+                    '<button class="delete_button" type="button">삭제</button>';
+                row.querySelector('.delete_button').addEventListener('click', function () {
+                    staticData.icons = staticData.icons.filter(function (item) { return item !== iconKey; });
+                    Object.keys(staticData.completed).forEach(function (date) {
+                        staticData.completed[date] = staticData.completed[date].filter(function (item) {
+                            return item !== iconKey;
+                        });
+                        if (!staticData.completed[date].length) delete staticData.completed[date];
+                    });
+                    saveStaticData();
+                    renderCalendar();
+                    renderSettings();
+                });
+                title.insertAdjacentElement('afterend', row);
+            });
+        }
+
+        const monthLinks = document.querySelectorAll('.calendar_toolbar .icon_button');
+        monthLinks[0].addEventListener('click', function (event) {
+            event.preventDefault();
+            selectedMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1);
+            renderCalendar();
         });
+        monthLinks[1].addEventListener('click', function (event) {
+            event.preventDefault();
+            selectedMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1);
+            renderCalendar();
+        });
+        document.getElementById('openSettings').addEventListener('click', renderSettings);
+        renderCalendar();
     }());
 </script>
 </body>

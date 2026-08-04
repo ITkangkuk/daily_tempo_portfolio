@@ -10,13 +10,13 @@
     <meta name="author" content="">   
     
     <!-- css -->
-    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/sub.css}">
+    <link rel="stylesheet" href="../static/assets/css/reset.css" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" href="../static/assets/css/common.css" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" href="../static/assets/css/sub.css" th:href="@{/assets/css/sub.css}">
 
     <!-- script -->
-    <script th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
-    <script th:src="@{/assets/scripts/script.js}"></script>
+    <script src="../static/assets/scripts/jquery-3.1.1.min.js" th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
+    <script src="../static/assets/scripts/script.js" th:src="@{/assets/scripts/script.js}"></script>
     <style>
         .exercise .tempo_input {
             width: 4.5em;
@@ -78,17 +78,17 @@
         <div class="wrap">
             <div class="menu">
                 <a href="">
-                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                    <img src="../static/assets/images/i_menu.png" th:src="@{/assets/images/i_menu.png}" alt="">
                 </a>
             </div>
             <div class="logo">
-                <a th:href="@{/home}">
-                    <img th:src="@{/assets/images/logo.png}" alt="">
+                <a href="home.html" th:href="@{/home}">
+                    <img src="../static/assets/images/logo.png" th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
                 </a>
             </div>
             <div class="menu">
                 <a href="#none" style="visibility: hidden;">
-                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                    <img src="../static/assets/images/i_menu.png" th:src="@{/assets/images/i_menu.png}" alt="">
                 </a>
             </div>
         </div>
@@ -140,8 +140,17 @@
             let blinkTimer = null;
             let cycleId = 0;
             let visible = true;
-            const tempoColor = /*[[${tempo.color}]]*/ '#ec6961';
-            const tempoName = /*[[${tempo.name}]]*/ 'Tempo';
+            let tempoColor = /*[[${tempo.color}]]*/ '#ec6961';
+            let tempoName = /*[[${tempo.name}]]*/ '';
+            if (window.location.pathname.endsWith('.html')) {
+                try {
+                    const staticTempo = JSON.parse(localStorage.getItem('dailyTempoStatic'));
+                    if (staticTempo) {
+                        tempoColor = staticTempo.color || tempoColor;
+                        tempoName = staticTempo.name || tempoName;
+                    }
+                } catch (error) { /* 기본 데모 값을 사용합니다. */ }
+            }
 
             nameLabel.textContent = tempoName;
             fill.style.backgroundColor = tempoColor;

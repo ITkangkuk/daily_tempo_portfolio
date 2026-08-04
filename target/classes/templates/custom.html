@@ -10,13 +10,13 @@
     <meta name="author" content="">   
     
     <!-- css -->
-    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/sub.css}">
+    <link rel="stylesheet" href="../static/assets/css/reset.css" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" href="../static/assets/css/common.css" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" href="../static/assets/css/sub.css" th:href="@{/assets/css/sub.css}">
 
     <!-- script -->
-    <script th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
-    <script th:src="@{/assets/scripts/script.js}"></script>
+    <script src="../static/assets/scripts/jquery-3.1.1.min.js" th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
+    <script src="../static/assets/scripts/script.js" th:src="@{/assets/scripts/script.js}"></script>
     <style>
         .custom_form {
             display: grid;
@@ -181,24 +181,24 @@
         <div class="wrap">
             <div class="menu">
                 <a href="">
-                    <img th:src="@{/assets/images/i_menu2.png}" alt="">
+                    <img src="../static/assets/images/i_menu2.png" th:src="@{/assets/images/i_menu2.png}" alt="">
                 </a>
             </div>
             <div class="logo">
-                <a th:href="@{/home}">
-                    <img th:src="@{/assets/images/logo2.png}" alt="">
+                <a href="home.html" th:href="@{/home}">
+                    <img src="../static/assets/images/logo2.png" th:src="@{/assets/images/logo2.png}" alt="Daily Tempo">
                 </a>
             </div>
             <div class="menu">
                 <a href="#none" style="visibility: hidden;">
-                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                    <img src="../static/assets/images/i_menu.png" th:src="@{/assets/images/i_menu.png}" alt="">
                 </a>
             </div>
         </div>
     </header>
     <div class="content ">
         <div class="wrap">
-            <form class="custom custom_form" id="customForm"
+            <form class="custom custom_form" id="customForm" action="exercise.html"
                   th:action="@{/custom}" th:object="${form}" method="post">
                 <ul th:if="${#fields.hasAnyErrors()}" role="alert">
                     <li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li>
@@ -206,14 +206,14 @@
                 <div class="box">
                     <div class="custom_field">
                         <label class="custom_label" for="tempoName">이름</label>
-                        <input class="custom_input" id="tempoName" type="text" th:field="*{name}"
+                        <input class="custom_input" id="tempoName" name="name" type="text" th:field="*{name}"
                                maxlength="20" placeholder="예: Pilates" required>
                     </div>
                 </div>
                 <div class="box">
                     <div class="custom_field">
                         <label class="custom_label" for="tempoType">템포 타입</label>
-                        <select class="custom_select" id="tempoType" th:field="*{type}">
+                        <select class="custom_select" id="tempoType" name="type" th:field="*{type}">
                             <option value="UPDOWN">UpDown</option>
                             <option value="DOT">Dot</option>
                         </select>
@@ -223,7 +223,7 @@
                     <div class="custom_field">
                         <label class="custom_label" for="tempoColor">템포 색상</label>
                         <div class="custom_color_row">
-                            <input class="custom_color" id="tempoColor" type="color" th:field="*{color}">
+                            <input class="custom_color" id="tempoColor" name="color" type="color" value="#ec6961" th:field="*{color}">
                             <output class="custom_color_value" id="tempoColorValue" for="tempoColor">#EC6961</output>
                             <div class="custom_preview" aria-label="템포 미리보기">
                                 <div class="custom_preview_shape" id="customPreview"></div>
@@ -232,7 +232,7 @@
                     </div>
                 </div>
                 <div class="custom_actions">
-                    <a th:href="@{/home}">취소</a>
+                    <a href="home.html" th:href="@{/home}">취소</a>
                     <button type="submit">저장 후 시작</button>
                 </div>
             </form>
@@ -260,6 +260,16 @@
 
             type.addEventListener('change', updatePreview);
             color.addEventListener('input', updatePreview);
+            document.getElementById('customForm').addEventListener('submit', function (event) {
+                if (!window.location.pathname.endsWith('.html')) return;
+                event.preventDefault();
+                localStorage.setItem('dailyTempoStatic', JSON.stringify({
+                    name: document.getElementById('tempoName').value,
+                    type: type.value,
+                    color: color.value
+                }));
+                window.location.href = type.value === 'DOT' ? 'exercise_dot.html' : 'exercise.html';
+            });
         }());
     </script>
 </body>

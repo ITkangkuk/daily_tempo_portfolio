@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle} + ' | Daily Tempo'">Daily Tempo</title>
-    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" href="../static/assets/css/reset.css" th:href="@{/assets/css/reset.css}">
     <style>
         html,
         body {
@@ -66,8 +66,8 @@
     </style>
 </head>
 <body>
-<main class="splash" th:data-login-url="@{/login}">
-    <img class="splash_logo" th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
+<main class="splash" data-login-url="login.html" th:data-login-url="@{/login}">
+    <img class="splash_logo" src="../static/assets/images/logo.png" th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
     <div class="progress" role="progressbar" aria-label="로그인 화면 불러오는 중">
         <div class="progress_bar"></div>
     </div>
