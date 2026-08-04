@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' | Daily Tempo'">Daily Tempo</title>
+    <meta name="keyword" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">   
+    
+    <!-- css -->
+    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/sub.css}">
+
+    <!-- script -->
+    <script th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
+    <script th:src="@{/assets/scripts/script.js}"></script>
+    <style>
+        .exercise .tempo_status {
+            text-align: center;
+        }
+
+        .exercise .tempo_input {
+            width: 4.5em;
+            border: 0;
+            border-bottom: 2px solid currentColor;
+            border-radius: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            text-align: center;
+        }
+
+        .exercise .tempo_unit {
+            margin-left: 0.2em;
+        }
+
+        .exercise .tempo_controls {
+            display: flex;
+            justify-content: center;
+            margin-top: min(4vw, 32px);
+        }
+
+        .exercise .tempo_toggle {
+            min-width: 140px;
+            padding: 12px 24px;
+            border: 0;
+            border-radius: 999px;
+            background: #fe5f59;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .exercise .state .fill.dot {
+            left: 50%;
+            width: 56px;
+            height: 56px !important;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            transition: none;
+        }
+    </style>
+    
+</head>
+<body>
+    <header>
+        <div class="wrap">
+            <div class="menu">
+                <a href="">
+                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                </a>
+            </div>
+            <div class="logo">
+                <a th:href="@{/home}">
+                    <img th:src="@{/assets/images/logo.png}" alt="">
+                </a>
+            </div>
+            <div class="menu">
+                <a href="#none" style="visibility: hidden;">
+                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="content ">
+        <div class="wrap">
+            <div class="exercise">
+                <ul class="data">
+                    <li>
+                        <h5 id="tempoNameLabel">Tempo</h5>
+                        <p id="tempoStatus" class="tempo_status" aria-live="polite">Up</p>
+                    </li>
+                </ul>
+                <div class="state" id="tempoState">
+                    <div class="box">
+                        <div class="fill" id="tempoFill" style="height: 0%;"></div>
+                    </div>
+                </div>
+                <ul class="data">
+                    <li>
+                        <label for="upSeconds"><h5>Up</h5></label>
+                        <p>
+                            <input class="tempo_input" id="upSeconds" type="number"
+                                   min="0.1" max="60" step="0.1" value="1"
+                                   aria-label="올라가는 시간">
+                            <span class="tempo_unit">s</span>
+                        </p>
+                    </li>
+                    <li>
+                        <label for="downSeconds"><h5>Down</h5></label>
+                        <p>
+                            <input class="tempo_input" id="downSeconds" type="number"
+                                   min="0.1" max="60" step="0.1" value="2"
+                                   aria-label="내려가는 시간">
+                            <span class="tempo_unit">s</span>
+                        </p>
+                    </li>
+                </ul>
+                <div class="tempo_controls">
+                    <button class="tempo_toggle" id="tempoToggle" type="button">일시정지</button>
+                </div>
+                <div class="ads">
+                    <a href="">
+                        광고 문의
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+
+    </footer>
+    <script th:inline="javascript">
+        (function () {
+            const fill = document.getElementById('tempoFill');
+            const state = document.getElementById('tempoState');
+            const nameLabel = document.getElementById('tempoNameLabel');
+            const upInput = document.getElementById('upSeconds');
+            const downInput = document.getElementById('downSeconds');
+            const status = document.getElementById('tempoStatus');
+            const toggle = document.getElementById('tempoToggle');
+
+            let running = true;
+            let currentAnimation = null;
+            let cycleId = 0;
+            let currentPhase = 'Up';
+            const tempoType = /*[[${tempo.type.name().toLowerCase()}]]*/ 'updown';
+            const tempoColor = /*[[${tempo.color}]]*/ '#ec6961';
+            const tempoName = /*[[${tempo.name}]]*/ 'Tempo';
+
+            nameLabel.textContent = tempoName;
+            state.style.backgroundColor = tempoColor;
+            fill.style.backgroundColor = tempoColor;
+            fill.classList.toggle('dot', tempoType === 'dot');
+
+            function seconds(input) {
+                const value = Number.parseFloat(input.value);
+                return Number.isFinite(value) ? Math.min(60, Math.max(0.1, value)) : 1;
+            }
+
+            function saveSettings() {
+                localStorage.setItem('dailyTempoUp', String(seconds(upInput)));
+                localStorage.setItem('dailyTempoDown', String(seconds(downInput)));
+            }
+
+            function loadSettings() {
+                const savedUp = Number.parseFloat(localStorage.getItem('dailyTempoUp'));
+                const savedDown = Number.parseFloat(localStorage.getItem('dailyTempoDown'));
+
+                if (Number.isFinite(savedUp)) upInput.value = String(savedUp);
+                if (Number.isFinite(savedDown)) downInput.value = String(savedDown);
+            }
+
+            async function move(from, to, duration, label, id) {
+                if (!running || id !== cycleId) return false;
+
+                currentPhase = label;
+                status.textContent = label;
+                const frames = tempoType === 'dot'
+                    ? [{bottom: from === '0%' ? '0%' : 'calc(100% - 56px)'},
+                       {bottom: to === '0%' ? '0%' : 'calc(100% - 56px)'}]
+                    : [{height: from}, {height: to}];
+
+                currentAnimation = fill.animate(
+                    frames,
+                    {
+                        duration: duration * 1000,
+                        easing: 'linear',
+                        fill: 'forwards'
+                    }
+                );
+
+                try {
+                    await currentAnimation.finished;
+                    return running && id === cycleId;
+                } catch (error) {
+                    return false;
+                }
+            }
+
+            async function startLoop() {
+                const id = ++cycleId;
+                if (tempoType === 'dot') {
+                    fill.style.bottom = '0%';
+                } else {
+                    fill.style.height = '0%';
+                }
+
+                while (running && id === cycleId) {
+                    if (!await move('0%', '100%', seconds(upInput), 'Up', id)) return;
+                    if (!await move('100%', '0%', seconds(downInput), 'Down', id)) return;
+                }
+            }
+
+            function restartLoop() {
+                saveSettings();
+                if (currentAnimation) currentAnimation.cancel();
+                if (running) startLoop();
+            }
+
+            [upInput, downInput].forEach(function (input) {
+                input.addEventListener('change', restartLoop);
+            });
+
+            toggle.addEventListener('click', function () {
+                if (running) {
+                    running = false;
+                    if (currentAnimation) currentAnimation.pause();
+                    status.textContent = 'Paused';
+                    toggle.textContent = '재생';
+                } else {
+                    running = true;
+                    if (currentAnimation && currentAnimation.playState === 'paused') {
+                        status.textContent = currentPhase;
+                        currentAnimation.play();
+                    } else {
+                        startLoop();
+                    }
+                    toggle.textContent = '일시정지';
+                }
+            });
+
+            loadSettings();
+            startLoop();
+        }());
+    </script>
+</body>
+</html>

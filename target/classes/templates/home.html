@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' | Daily Tempo'">Daily Tempo</title>
+    <meta name="keyword" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">   
+    
+    <!-- css -->
+    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/sub.css}">
+
+    <!-- script -->
+    <script th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
+    <script th:src="@{/assets/scripts/script.js}"></script>
+    <style>
+        header .calendar_home_link {
+            display: inline-flex;
+            align-items: baseline;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            color: #fb6058;
+        }
+
+        header .calendar_home_link svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .drawer_trigger {
+            padding: 0;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .drawer_trigger img {
+            display: block;
+            width: auto;
+            height: clamp(18px, 4vw, 47px);
+        }
+
+        .drawer_backdrop {
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            border: 0;
+            background: rgba(20, 20, 20, .38);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .25s ease, visibility .25s ease;
+            cursor: pointer;
+        }
+
+        .side_drawer {
+            position: fixed;
+            z-index: 1001;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            width: min(82vw, 360px);
+            padding: 34px 28px 28px;
+            box-sizing: border-box;
+            background: #fff;
+            box-shadow: 8px 0 28px rgba(0, 0, 0, .13);
+            transform: translateX(-105%);
+            transition: transform .3s ease;
+        }
+
+        body.drawer_open {
+            overflow: hidden;
+        }
+
+        body.drawer_open .drawer_backdrop {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        body.drawer_open .side_drawer {
+            transform: translateX(0);
+        }
+
+        .drawer_header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .drawer_header img {
+            width: 132px;
+        }
+
+        .drawer_close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #555;
+            font-size: 34px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .drawer_profile {
+            padding: 30px 0;
+        }
+
+        .drawer_profile_label {
+            margin-bottom: 8px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .drawer_username {
+            color: #222;
+            font-size: 22px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .drawer_nav {
+            display: grid;
+            gap: 8px;
+        }
+
+        .drawer_nav a {
+            display: flex;
+            align-items: center;
+            min-height: 48px;
+            padding: 0 14px;
+            border-radius: 12px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .drawer_nav a:hover {
+            background: #fff3f2;
+            color: #fb6058;
+        }
+
+        .drawer_logout_form {
+            margin-top: auto;
+        }
+
+        .drawer_logout {
+            width: 100%;
+            padding: 14px 20px;
+            border: 1px solid #fb6058;
+            border-radius: 999px;
+            background: #fff;
+            color: #fb6058;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .drawer_backdrop,
+            .side_drawer {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="wrap">
+            <div class="menu">
+                <button class="drawer_trigger" id="openDrawer" type="button"
+                        aria-label="개인 메뉴 열기" aria-controls="sideDrawer" aria-expanded="false">
+                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                </button>
+            </div>
+            <div class="logo">
+                <a th:href="@{/home}">
+                    <img th:src="@{/assets/images/logo.png}" alt="">
+                </a>
+            </div>
+            <div class="menu">
+                <a class="calendar_home_link" th:href="@{/calendar}" aria-label="캘린더로 이동">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+                        <path d="M16 3v4M8 3v4M3 10h18"></path>
+                        <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <button class="drawer_backdrop" id="drawerBackdrop" type="button"
+            aria-label="개인 메뉴 닫기" tabindex="-1"></button>
+    <aside class="side_drawer" id="sideDrawer" aria-label="개인 메뉴" aria-hidden="true">
+        <div class="drawer_header">
+            <img th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
+            <button class="drawer_close" id="closeDrawer" type="button" aria-label="개인 메뉴 닫기">×</button>
+        </div>
+        <div class="drawer_profile">
+            <p class="drawer_profile_label">아이디</p>
+            <p class="drawer_username" th:text="${currentUser.username}">dailytempo</p>
+        </div>
+        <nav class="drawer_nav" aria-label="바로가기">
+            <a th:href="@{/home}">홈</a>
+            <a th:href="@{/custom}">새 템포 만들기</a>
+            <a th:href="@{/calendar}">운동 캘린더</a>
+        </nav>
+        <form class="drawer_logout_form" th:action="@{/logout}" method="post">
+            <button class="drawer_logout" type="submit">로그아웃</button>
+        </form>
+    </aside>
+
+    <div class="content ">
+        <div class="wrap">
+            <div class="main">
+                <div class="obj">
+                    <div class="bar">
+                        <img th:src="@{/assets/images/main2.png}" alt="">
+                    </div>
+                    <div class="tto">
+                        <img th:src="@{/assets/images/ttu.png}" alt="">
+                    </div>
+                    <div class="tto_bottom">
+                        <img th:src="@{/assets/images/ttu_bottom.png}" alt="">
+                    </div>
+                    <ul class="select_list">
+                        <li>
+                            <div class="select">
+                                <a th:href="@{/custom}">
+                                    <img th:src="@{/assets/images/main1.png}" alt="">
+                                    <p>+</p>
+                                </a>
+                            </div>
+                        </li>
+                        <li th:each="tempo : ${tempoBoxes}">
+                            <div class="select">
+                                <a th:if="${tempo.type.name() == 'UPDOWN'}"
+                                   th:href="@{/exercise(id=${tempo.id})}">
+                                    <img th:src="@{/assets/images/main1.png}" alt="">
+                                    <p th:text="${tempo.name}">Tempo</p>
+                                </a>
+                                <a th:if="${tempo.type.name() == 'DOT'}"
+                                   th:href="@{/exercise_dot(id=${tempo.id})}">
+                                    <img th:src="@{/assets/images/main1.png}" alt="">
+                                    <p th:text="${tempo.name}">Tempo</p>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="information">
+                    <h5>운동 후에 단백질을 섭취해야 하는 이유!</h5>
+                    <div class="txt">
+                        <p>
+                            미국의 콜로라도주립 대학 벤자민 밀러 교수가 연구를 했고 37세 이상 성인들과<br class="pc_only"/>
+                            단백질 음료와 탄수화물 음료로 6주간 실험을 하였고 결과적으로 운동 후
+                        </p>
+                        <button type="button">
+                            <img th:src="@{/assets/images/i_arrow.png}" alt="">
+                        </button>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function() {
+                        var $body = $('body');
+                        var $drawer = $('#sideDrawer');
+                        var $openButton = $('#openDrawer');
+                        var $closeButton = $('#closeDrawer');
+
+                        function openDrawer() {
+                            $body.addClass('drawer_open');
+                            $drawer.attr('aria-hidden', 'false');
+                            $openButton.attr('aria-expanded', 'true');
+                            $closeButton.trigger('focus');
+                        }
+
+                        function closeDrawer() {
+                            $body.removeClass('drawer_open');
+                            $drawer.attr('aria-hidden', 'true');
+                            $openButton.attr('aria-expanded', 'false');
+                            $openButton.trigger('focus');
+                        }
+
+                        $openButton.on('click', openDrawer);
+                        $closeButton.add('#drawerBackdrop').on('click', closeDrawer);
+                        $(document).on('keydown', function(event) {
+                            if (event.key === 'Escape' && $body.hasClass('drawer_open')) {
+                                closeDrawer();
+                            }
+                        });
+
+                        $('.select_list a').on('click', function(event) {
+                            event.preventDefault(); // 링크의 기본 동작 막기
+                            
+                            var $currentLi = $(this).closest('li'); // 클릭된 a 태그의 부모 li
+                            var $nextLis = $currentLi.nextAll(); // 클릭된 li 이후의 형제 li들
+
+                            // 클릭한 li와 다음 형제 li들에게 .on 클래스 추가
+                            $currentLi.addClass('on');
+                            $nextLis.addClass('on');
+
+                            // 1초 후에 링크로 이동
+                            var link = $(this).attr('href'); // 클릭된 a 태그의 href 값 가져오기
+                            setTimeout(function() {
+                                window.location.href = link; // 링크로 이동
+                            }, 1000); // 1000ms = 1초
+                        });
+
+
+                        // // .select의 개수를 셉니다
+                        // var selectCount = $('.select').length;
+                        // console.log(selectCount);
+
+                        // // vw와 px 값 계산 (개수당 각각 23vw, 250px 곱하고 마지막에 5vw, 40px 더하기)
+                        // var vwValue = (23 * selectCount) + 28;
+                        // var pxValue = (250 * selectCount) + 290;
+
+                        // // .bar의 height를 계산한 min 값으로 설정
+                        // $('.bar').css('height', 'min(' + vwValue + 'vw, ' + pxValue + 'px)');                        
+                    });                        
+                </script>
+            </div>
+        </div>
+    </div>
+    <footer>
+
+    </footer>
+
+
+    
+</body>
+</html>

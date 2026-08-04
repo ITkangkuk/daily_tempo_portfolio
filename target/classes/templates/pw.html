@@ -1,0 +1,78 @@
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' | Daily Tempo'">Daily Tempo</title>
+    <meta name="keyword" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">   
+    
+    <!-- css -->
+    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/sub.css}">
+
+    <!-- script -->
+    <script th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
+    <script th:src="@{/assets/scripts/script.js}"></script>
+    
+</head>
+<body>
+    <header>
+        <div class="wrap">
+            <div class="menu">
+                <a href="">
+                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                </a>
+            </div>
+            <div class="logo">
+                <a th:href="@{/home}">
+                    <img th:src="@{/assets/images/logo.png}" alt="">
+                </a>
+            </div>
+            <div class="menu">
+                <a href="#none" style="visibility: hidden;">
+                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="content ">
+        <div class="wrap">
+            <div class="find_id">
+                <ul class="link_list">
+                    <li>
+                        <a th:href="@{/id}">아이디 찾기</a>
+                        <div class="line"></div>
+                    </li>
+                    <li class="on">
+                        <a th:href="@{/pw}">비밀번호 찾기</a>
+                        <div class="line"></div>
+                    </li>
+                </ul>
+                <div class="input_wrap first">
+                    <input type="text" placeholder="이름">
+                </div>
+                <div class="input_wrap">
+                    <input type="text" placeholder="휴대전화번호 입력 ('-'제외)">
+                    <a href="#">인증번호 전송</a>
+                </div>
+                <div class="input_wrap">
+                    <input type="text" placeholder="인증번호 입력">
+                </div>
+                <div class="btn">
+                    <button type="submit" class="btn_primary">로그인</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <footer>
+
+    </footer>
+
+
+    
+</body>
+</html>

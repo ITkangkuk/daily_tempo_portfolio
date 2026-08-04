@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' | Daily Tempo'">Daily Tempo</title>
+    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: #fff;
+        }
+
+        .splash {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 100%;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        .splash_logo {
+            display: block;
+            width: min(52vw, 280px);
+            height: auto;
+        }
+
+        .progress {
+            width: min(52vw, 280px);
+            height: 6px;
+            margin-top: 16px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #eee;
+        }
+
+        .progress_bar {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: #fe5f59;
+            animation: loading 0.9s ease-out forwards;
+        }
+
+        @keyframes loading {
+            to {
+                width: 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .progress_bar {
+                animation-timing-function: linear;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="splash" th:data-login-url="@{/login}">
+    <img class="splash_logo" th:src="@{/assets/images/logo.png}" alt="Daily Tempo">
+    <div class="progress" role="progressbar" aria-label="로그인 화면 불러오는 중">
+        <div class="progress_bar"></div>
+    </div>
+</main>
+<script>
+    window.setTimeout(function () {
+        window.location.replace(document.querySelector('.splash').dataset.loginUrl);
+    }, 1000);
+</script>
+</body>
+</html>

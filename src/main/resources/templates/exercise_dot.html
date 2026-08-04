@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' | Daily Tempo'">Daily Tempo</title>
+    <meta name="keyword" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">   
+    
+    <!-- css -->
+    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/sub.css}">
+
+    <!-- script -->
+    <script th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
+    <script th:src="@{/assets/scripts/script.js}"></script>
+    <style>
+        .exercise .tempo_input {
+            width: 4.5em;
+            border: 0;
+            border-bottom: 2px solid currentColor;
+            border-radius: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            text-align: center;
+        }
+
+        .exercise .tempo_unit {
+            margin-left: 0.2em;
+        }
+
+        .exercise .tempo_controls {
+            display: flex;
+            justify-content: center;
+            margin-top: min(4vw, 32px);
+        }
+
+        .exercise .tempo_toggle {
+            min-width: 140px;
+            padding: 12px 24px;
+            border: 0;
+            border-radius: 999px;
+            background: #fe5f59;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .exercise .dot_stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin: 80px 0 0;
+        }
+
+        .exercise .dot_stage .data {
+            width: 100%;
+        }
+
+        .exercise .tempo_dot {
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            opacity: 1;
+            transition: none;
+        }
+    </style>
+    
+</head>
+<body>
+    <header>
+        <div class="wrap">
+            <div class="menu">
+                <a href="">
+                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                </a>
+            </div>
+            <div class="logo">
+                <a th:href="@{/home}">
+                    <img th:src="@{/assets/images/logo.png}" alt="">
+                </a>
+            </div>
+            <div class="menu">
+                <a href="#none" style="visibility: hidden;">
+                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="content ">
+        <div class="wrap">
+            <div class="exercise">
+                <ul class="data">
+                    <li>
+                        <h5 id="tempoNameLabel">Tempo</h5>
+                    </li>
+                </ul>
+                <div class="dot_stage">
+                    <div class="tempo_dot" id="tempoFill" aria-label="점멸 템포"></div>
+                    <ul class="data">
+                        <li>
+                            <label for="tempoSeconds"><h5>Tempo</h5></label>
+                            <p>
+                                <input class="tempo_input" id="tempoSeconds" type="number"
+                                       min="0.1" max="60" step="0.1" value="1"
+                                       aria-label="점멸 간격">
+                                <span class="tempo_unit">s</span>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tempo_controls">
+                    <button class="tempo_toggle" id="tempoToggle" type="button">일시정지</button>
+                </div>
+                <div class="ads">
+                    <a href="">
+                        광고 문의
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+
+    </footer>
+    <script th:inline="javascript">
+        (function () {
+            const fill = document.getElementById('tempoFill');
+            const nameLabel = document.getElementById('tempoNameLabel');
+            const tempoInput = document.getElementById('tempoSeconds');
+            const toggle = document.getElementById('tempoToggle');
+
+            let running = true;
+            let blinkTimer = null;
+            let cycleId = 0;
+            let visible = true;
+            const tempoColor = /*[[${tempo.color}]]*/ '#ec6961';
+            const tempoName = /*[[${tempo.name}]]*/ 'Tempo';
+
+            nameLabel.textContent = tempoName;
+            fill.style.backgroundColor = tempoColor;
+
+            function seconds() {
+                const value = Number.parseFloat(tempoInput.value);
+                return Number.isFinite(value) ? Math.min(60, Math.max(0.1, value)) : 1;
+            }
+
+            function saveSettings() {
+                localStorage.setItem('dailyTempoDotSeconds', String(seconds()));
+            }
+
+            function loadSettings() {
+                const savedTempo = Number.parseFloat(localStorage.getItem('dailyTempoDotSeconds'));
+
+                if (Number.isFinite(savedTempo)) tempoInput.value = String(savedTempo);
+            }
+
+            function renderDot() {
+                fill.style.opacity = visible ? '1' : '0';
+            }
+
+            function startLoop() {
+                const id = ++cycleId;
+                visible = true;
+                renderDot();
+
+                function blink() {
+                    if (!running || id !== cycleId) return;
+                    visible = !visible;
+                    renderDot();
+                    blinkTimer = window.setTimeout(blink, seconds() * 1000);
+                }
+
+                blinkTimer = window.setTimeout(blink, seconds() * 1000);
+            }
+
+            function restartLoop() {
+                saveSettings();
+                window.clearTimeout(blinkTimer);
+                if (running) startLoop();
+            }
+
+            tempoInput.addEventListener('change', restartLoop);
+
+            toggle.addEventListener('click', function () {
+                if (running) {
+                    running = false;
+                    cycleId++;
+                    window.clearTimeout(blinkTimer);
+                    visible = true;
+                    fill.style.opacity = '1';
+                    toggle.textContent = '재생';
+                } else {
+                    running = true;
+                    startLoop();
+                    toggle.textContent = '일시정지';
+                }
+            });
+
+            loadSettings();
+            startLoop();
+        }());
+    </script>
+</body>
+</html>

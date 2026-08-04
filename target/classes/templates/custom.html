@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' | Daily Tempo'">Daily Tempo</title>
+    <meta name="keyword" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">   
+    
+    <!-- css -->
+    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/sub.css}">
+
+    <!-- script -->
+    <script th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
+    <script th:src="@{/assets/scripts/script.js}"></script>
+    <style>
+        .custom_form {
+            display: grid;
+            gap: 28px;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .custom_form .box {
+            display: flex;
+            align-items: center;
+            height: auto !important;
+            min-height: 150px;
+            padding: 28px 56px;
+            box-sizing: border-box;
+        }
+
+        .custom_field {
+            display: grid;
+            grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1.2fr);
+            align-items: center;
+            width: 100%;
+            gap: 28px;
+        }
+
+        .custom_label {
+            color: #fe3a46;
+            font-size: clamp(22px, 4vw, 40px);
+            font-weight: 700;
+        }
+
+        .custom_input,
+        .custom_select {
+            width: 100%;
+            min-width: 0;
+            padding: 14px 18px;
+            border: 2px solid #fe5f59;
+            border-radius: 14px;
+            box-sizing: border-box;
+            background: #fff;
+            color: #333;
+            font-size: clamp(18px, 3vw, 30px);
+        }
+
+        .custom_color_row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            min-width: 0;
+            gap: 16px;
+        }
+
+        .custom_color {
+            width: 76px;
+            height: 56px;
+            padding: 0;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .custom_color_value {
+            font-size: clamp(18px, 3vw, 28px);
+        }
+
+        .custom_preview {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin-left: auto;
+            overflow: hidden;
+            border: 3px solid #eee;
+            border-radius: 18px;
+            background: #fff;
+        }
+
+        .custom_preview_shape {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            height: 65%;
+            background: #ec6961;
+        }
+
+        .custom_preview_shape.dot {
+            right: auto;
+            left: 50%;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        .custom_actions {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 12px;
+        }
+
+        .custom_actions button,
+        .custom_actions a {
+            min-width: 130px;
+            padding: 14px 24px;
+            border: 2px solid #fff;
+            border-radius: 999px;
+            box-sizing: border-box;
+            color: #fff;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .custom_actions button {
+            background: #fff;
+            color: #fe5f59;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .custom_page .content > .wrap {
+                width: 100%;
+                padding-right: 16px;
+                padding-left: 16px;
+                box-sizing: border-box;
+            }
+
+            .custom_form .box {
+                width: 100%;
+                min-height: 120px;
+                padding: 24px 30px;
+                border-radius: 30px;
+            }
+
+            .custom_field {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .custom_preview {
+                width: 72px;
+                height: 72px;
+                margin-left: 0;
+            }
+
+            .custom_actions {
+                flex-wrap: wrap;
+            }
+
+            .custom_actions button,
+            .custom_actions a {
+                flex: 1 1 130px;
+            }
+        }
+    </style>
+    
+</head>
+<body class="custom_page" style="background: #fe5f59;">
+    <header>
+        <div class="wrap">
+            <div class="menu">
+                <a href="">
+                    <img th:src="@{/assets/images/i_menu2.png}" alt="">
+                </a>
+            </div>
+            <div class="logo">
+                <a th:href="@{/home}">
+                    <img th:src="@{/assets/images/logo2.png}" alt="">
+                </a>
+            </div>
+            <div class="menu">
+                <a href="#none" style="visibility: hidden;">
+                    <img th:src="@{/assets/images/i_menu.png}" alt="">
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="content ">
+        <div class="wrap">
+            <form class="custom custom_form" id="customForm"
+                  th:action="@{/custom}" th:object="${form}" method="post">
+                <ul th:if="${#fields.hasAnyErrors()}" role="alert">
+                    <li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li>
+                </ul>
+                <div class="box">
+                    <div class="custom_field">
+                        <label class="custom_label" for="tempoName">이름</label>
+                        <input class="custom_input" id="tempoName" type="text" th:field="*{name}"
+                               maxlength="20" placeholder="예: Pilates" required>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="custom_field">
+                        <label class="custom_label" for="tempoType">템포 타입</label>
+                        <select class="custom_select" id="tempoType" th:field="*{type}">
+                            <option value="UPDOWN">UpDown</option>
+                            <option value="DOT">Dot</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="custom_field">
+                        <label class="custom_label" for="tempoColor">템포 색상</label>
+                        <div class="custom_color_row">
+                            <input class="custom_color" id="tempoColor" type="color" th:field="*{color}">
+                            <output class="custom_color_value" id="tempoColorValue" for="tempoColor">#EC6961</output>
+                            <div class="custom_preview" aria-label="템포 미리보기">
+                                <div class="custom_preview_shape" id="customPreview"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="custom_actions">
+                    <a th:href="@{/home}">취소</a>
+                    <button type="submit">저장 후 시작</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <footer>
+
+    </footer>
+
+
+    <script>
+        (function () {
+            const type = document.getElementById('tempoType');
+            const color = document.getElementById('tempoColor');
+            const colorValue = document.getElementById('tempoColorValue');
+            const preview = document.getElementById('customPreview');
+
+            function updatePreview() {
+                preview.style.backgroundColor = color.value;
+                preview.classList.toggle('dot', type.value === 'DOT');
+                colorValue.value = color.value.toUpperCase();
+            }
+
+            updatePreview();
+
+            type.addEventListener('change', updatePreview);
+            color.addEventListener('input', updatePreview);
+        }());
+    </script>
+</body>
+</html>

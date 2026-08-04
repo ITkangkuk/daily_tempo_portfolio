@@ -1,0 +1,89 @@
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' | Daily Tempo'">Daily Tempo</title>
+    <meta name="keyword" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">   
+    
+    <!-- css -->
+    <link rel="stylesheet" th:href="@{/assets/css/reset.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/sub.css}">
+
+    <!-- script -->
+    <script th:src="@{/assets/scripts/jquery-3.1.1.min.js}"></script>
+    <script th:src="@{/assets/scripts/script.js}"></script>
+    
+</head>
+<body>
+    <header>
+        <div class="wrap">
+            <div class="menu" style="visibility: hidden;">
+                <a href="#none">
+                    <img th:src="@{/assets/images/i_close.png}" alt="">
+                </a>
+            </div>
+            <div class="menu">
+                <a href="#">
+                    <img th:src="@{/assets/images/i_close.png}" alt="">
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="content ">
+        <div class="wrap">
+            <form class="login" th:action="@{/login}" method="post">
+                <div class="logo">
+                    <img th:src="@{/assets/images/logo.png}" alt="">
+                </div>
+                <p th:if="${param.error}" role="alert">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+                <p th:if="${param.registered}">회원가입이 완료되었습니다. 로그인해 주세요.</p>
+                <p th:if="${param.logout}">로그아웃되었습니다.</p>
+                <div class="input_wrap first">
+                    <input type="text" name="username" placeholder="ID" autocomplete="username" required>
+                </div>
+                <div class="input_wrap">
+                    <input type="password" name="password" placeholder="PW" autocomplete="current-password" required>
+                </div>
+                <ul class="sns_list">
+                    <li>
+                        <button type="submit">
+                            로그인
+                        </button>
+                    </li>
+                    <li>
+                        <a href="#none" aria-disabled="true" title="네이버 OAuth 설정 후 활성화됩니다">
+                            네이버로 로그인
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#none" aria-disabled="true" title="카카오 OAuth 설정 후 활성화됩니다">
+                            카카오로 로그인
+                        </a>
+                    </li>
+                </ul>
+                <ul class="find_list">
+                    <li>
+                        <a th:href="@{/id}">아이디 찾기</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/pw}">비밀번호 찾기</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/membership}">회원가입</a>
+                    </li>
+                </ul>
+            </form>
+        </div>
+    </div>
+    <footer>
+
+    </footer>
+
+
+    
+</body>
+</html>

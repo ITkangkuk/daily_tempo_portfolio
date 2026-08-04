@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<body>
+<header th:fragment="header(pageTitle)">
+    <div class="wrap">
+        <div class="menu">
+            <a th:href="@{/home}">
+                <img th:src="@{/assets/images/i_menu.png}" alt="menu">
+            </a>
+        </div>
+        <div class="logo">
+            <a th:href="@{/home}">
+                <img th:src="@{/assets/images/logo.png}" alt="logo">
+            </a>
+        </div>
+        <div class="menu">
+            <a th:href="@{/login}" style="visibility: visible;">
+                <img th:src="@{/assets/images/i_menu.png}" alt="login">
+            </a>
+        </div>
+    </div>
+</header>
+
+<footer th:fragment="footer">
+    <div class="wrap">
+        <p>Daily Tempo</p>
+    </div>
+</footer>
+</body>
+</html>
